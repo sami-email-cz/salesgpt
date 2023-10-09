@@ -3,7 +3,7 @@ import argparse
 import os
 import json
 
-from sales_gpt import SalesGPT
+from sales_gpt_tools_cz import SalesGPT
 from langchain.chat_models import ChatOpenAI
 
 
@@ -39,27 +39,40 @@ if __name__ == "__main__":
     else:
         with open(config_path,'r') as f:
             config = json.load(f)
+        print(f'Loaged config {config_path} ')
         print(f'Agent config {config}')
+        with open(config['custom_prompt_file'], 'r') as f:
+            config['custom_prompt'] = f.read()
+        with open(config['stage_analyser_prompt_template_file'], 'r') as f:
+            config['custom_stage_prompt'] = f.read()
+        with open(config['custom_tools_prompt_file'], 'r') as f:
+            config['custom_tools_prompt'] = f.read()
+        print(f'Loaged config {config_path} ', flush=True)
         sales_agent = SalesGPT.from_llm(llm, verbose=verbose, **config)
 
-    sales_agent.seed_agent()
+    #sales_agent.seed_agent()
+    chat_id = sales_agent.seed_agent()
+    sales_agent.config_path = config_path
+    #sales_agent_dict[chat_id] = sales_agent
+    print(f"START_AGENT SALES AGENT START chat_id: {chat_id} {sales_agent}")
     print('='*10)
     cnt = 0
     while cnt !=max_num_turns:
         cnt+=1
         if cnt==max_num_turns:
-            print('Maximum number of turns reached - ending the conversation.')
+            print('Dosažený maximální počet tahů - ukončení konverzace.')
             break
         stage_id = sales_agent.determine_conversation_stage() #MS
-        logger.info("determ stage {stage_id}")
+        print(f"determ stage {stage_id}")
         tool = sales_agent.check_tools()
-        logger.info("check_tools {tool}")
+        print(f"check_tools {tool}")
         sales_agent.step()
 
         # end conversation 
         if '<END_OF_CALL>' in sales_agent.conversation_history[-1]:
-            print('Sales Agent determined it is time to end the conversation.')
+            print('Obchodní zástupce rozhodl, že je čas ukončit rozhovor.')
             break
         human_input = input('Your response: ')
         sales_agent.human_step(human_input)
         print('='*10)
+

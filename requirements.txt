@@ -1,1 +1,6 @@
 langchain
+flask
+pydantic
+multiline
+flask_session
+msal

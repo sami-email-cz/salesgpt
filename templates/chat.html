@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatovací okno</title>
+</head>
+<body>
+  <h1>Chatovací okno</h1>
+  <div id="chat-messages"></div>
+  <input type="text" id="new-message-input" />
+  <button id="send-button">Odeslat zprávu</button>
+
+  <script>
+    // Funkce pro zobrazení zpráv
+    function showMessages(messages) {
+      var messagesDiv = document.getElementById('chat-messages');
+      messagesDiv.innerHTML = '';
+
+      messages.forEach(function(message) {
+        var messageDiv = document.createElement('div');
+        messageDiv.textContent = message.text;
+        messagesDiv.appendChild(messageDiv);
+      });
+    }
+
+
+     // Funkce pro odeslání zprávy
+  function sendMessage() {
+    var newMessageInput = document.getElementById('new-message-input');
+    var newMessage = newMessageInput.value;
+
+    fetch(API_URL + '/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text: newMessage })
+    })
+      .then(function(response) {
+        if (response.ok) {
+          // Získání aktualizovaných zpráv
+          fetchMessages();
+          // Vymazání pole pro novou zprávu
+          newMessageInput.value = '';
+        } else {
+          console.error('Nastala chyba při odesílání zprávy:', response.status);
+        }
+      })
+      .catch(function(error) {
+        console.error('Nastala chyba při odesílání zprávy:', error);
+      });
+  }  
+
+
+
+    // Získání zpráv z API
+    function fetchMessages() {
+      // Získat zprávy z API a zavolat funkci showMessages s výsledky
+    }
+
+    // Načtení zpráv při načtení stránky
+    fetchMessages();
+
+    // Přiřazení funkce odeslání zprávy k tlačítku
+    var sendButton = document.getElementById('send-button');
+    sendButton.addEventListener('click', sendMessage);
+  </script>
+</body>
+</html>
